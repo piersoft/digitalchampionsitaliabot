@@ -146,6 +146,7 @@ function location_manager($telegram,$user_id,$chat_id,$location)
 			$url="http://www.digitalchampions.it/?geo_mashup_content=geo-query&near_lat=".$lat;
 				$url .="&near_lng=".$lon;
 				$url .="&radius_km=20";
+				$url .="&sort=distance_km%20ASC";
 			$json_string = file_get_contents($url);
 			$parsed_json = json_decode($json_string);
 			$count=0;
