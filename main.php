@@ -41,7 +41,7 @@ function start($telegram,$update)
 	$today = date("Y-m-d H:i:s");
 
 	if ($text == "/start") {
-		$reply = "Benvenuto. Per ricercare un museo, clicca sulla graffetta (📎) e poi 'posizione' oppure digita il nome del Comune. Verrà interrogato il DataBase Unico del Mibact utilizzabile con licenza CC-BY e verranno elencati fino a max 20 musei. In qualsiasi momento scrivendo /start ti ripeterò questo messaggio di benvenuto.\nQuesto bot, non ufficiale, è stato realizzato da @piersoft e il codice sorgente per libero riuso si trova su https://github.com/piersoft/MuseiMibactBot. La propria posizione viene ricercata grazie al geocoder di openStreetMap con Lic. odbl.";
+		$reply = "Benvenuto. Per ricercare un Digital Champions italiano, clicca sulla graffetta (📎) e poi 'posizione' oppure digita il nome del Comune. Verrà interrogato il DataBase e verranno elencati fino a max 20 campioni digitali. In qualsiasi momento scrivendo /start ti ripeterò questo messaggio di benvenuto.\nQuesto bot, non ufficiale, è stato realizzato da @piersoft e il codice sorgente per libero riuso si trova su https://github.com/piersoft/digitalchampionsbot. La propria posizione viene ricercata grazie al geocoder di openStreetMap con Lic. odbl.";
 		$content = array('chat_id' => $chat_id, 'text' => $reply,'disable_web_page_preview'=>true);
 		$telegram->sendMessage($content);
 		$log=$today. ";new chat started;" .$chat_id. "\n";
@@ -59,218 +59,45 @@ function start($telegram,$update)
 //elseif($text !=null)
 
 		else{
-			$location="Sto cercando i Musei censiti dal Mibact del Comune di: ".$text;
+
+			$location="Sto cercando i Campioni digitali censiti nel Comune di: ".$text;
 			$content = array('chat_id' => $chat_id, 'text' => $location,'disable_web_page_preview'=>true);
 			$telegram->sendMessage($content);
 			sleep (1);
-			$html = file_get_contents('http://dbunico20.beniculturali.it/DBUnicoManagerWeb/dbunicomanager/searchPlace?tipologiaLuogo=1&quantita=20&comune='.$text);
+					$text=str_replace(" ","%20",$text);
+			$json_string = file_get_contents('http://www.digitalchampions.it/?geo_mashup_content=geo-query&saved_name='.$text);
 
-		$html=str_replace("<![CDATA[","",$html);
-		$html=str_replace("]]>","",$html);
-		$html=str_replace("</br>","",$html);
-		$html=str_replace("\n","",$html);
-		$html=str_replace("&nbsp;","",$html);
-		$html=str_replace(";"," ",$html);
-		$html=str_replace(","," ",$html);
-		if (strpos($html,'<mibac>') == false) {
-			$content = array('chat_id' => $chat_id, 'text' => "Non ci risultano Musei censiti Mibact in questo luogo",'disable_web_page_preview'=>true);
-				$telegram->sendMessage($content);
-		}
+			$parsed_json = json_decode($json_string);
+			$count=0;
+			$temp_c1="";
+			foreach($parsed_json->{'objects'} as $data=>$csv1){
+			   $count = $count+1;
+				}
+				if ($count==0) {
+					$json_string = file_get_contents('http://www.digitalchampions.it/?geo_mashup_content=geo-query&locality_name='.$text);
 
-		$doc = new DOMDocument;
-		$doc->loadHTML($html);
-
-		$xpa    = new DOMXPath($doc);
-			//var_dump($doc);
-		$divsl   = $xpa->query('//codice[@sorgente="DBUnico 2.0"]');
-		$divs0   = $xpa->query('//mibac');
-		$divs   = $xpa->query('//mibac//luogodellacultura/proprieta');
-		$divs1   = $xpa->query('//mibac//luogodellacultura/denominazione/nomestandard');
-		$divs2   = $xpa->query('//mibac//luogodellacultura/descrizione/testostandard');
-		$divs3   = $xpa->query('//mibac//luogodellacultura/descrizione/traduzioni');
-		$divs4   = $xpa->query('//mibac//luogodellacultura/orario/testostandard');
-		$divs5   = $xpa->query('//info/sitoweb');
-		$divs6   = $xpa->query('//info/email');
-		$divs7   = $xpa->query('//info/telefono/testostandard');
-		$divs8   = $xpa->query('//chiusurasettimanale/testostandard');
-		$divs9   = $xpa->query('//latitudine');
-		$divs10   = $xpa->query('//longitudine');
-		$divs11   = $xpa->query('//indirizzo/via-piazza');
-		$divs12   = $xpa->query('//allegati/file/url');
-		$divs13   = $xpa->query('//info/orario/testostandard');
-		$dival=[];
-		$diva=[];
-		$diva1=[];
-		$diva2=[];
-		$diva3=[];
-		$diva4=[];
-		$diva5=[];
-		$diva6=[];
-		$diva7=[];
-		$diva8=[];
-		$diva9=[];
-		$diva10=[];
-		$diva11=[];
-		$diva12=[];
-			$diva13=[];
-		$count=0;
-		foreach($divs0 as $div0) {
-			$count++;
-		}
-		echo "Count: ".$count."\n";
-		foreach($divsl as $divl) {
-
-					array_push($dival,$divl->nodeValue);
-		}
-
-			foreach($divs as $div) {
-					array_push($diva,$div->nodeValue);
-
+			//		$content = array('chat_id' => $chat_id, 'text' => "Non ci risultano digitalchampions in questo luogo",'disable_web_page_preview'=>true);
+			//			$telegram->sendMessage($content);
+			$parsed_json = json_decode($json_string);
+			$count=0;
+			$temp_c1="";
+			foreach($parsed_json->{'objects'} as $data=>$csv1){
+				 $count = $count+1;
+				}
+				if ($count==0) {
+							$content = array('chat_id' => $chat_id, 'text' => "Non ci risultano digitalchampions in questo luogo",'disable_web_page_preview'=>true);
+								$telegram->sendMessage($content);
+				}
+				}
+				  for ($i=0;$i<$count;$i++){
+			$temp_c1 .= $parsed_json->{'objects'}[$i]->{'title'}."\nhttp://www.digitalchampions.it/?p=".$parsed_json->{'objects'}[$i]->{'object_id'};
+			$temp_c1 .="\n";
+			//var_dump($parsed_json);
 			}
 
-			foreach($divs1 as $div1) {
-
-						array_push($diva1,$div1->nodeValue);
-			}
-
-			foreach($divs2 as $div2) {
-
-						array_push($diva2,$div2->nodeValue);
-			}
-			foreach($divs3 as $div3) {
-
-						array_push($diva3,$div3->nodeValue);
-			}
-			foreach($divs4 as $div4) {
-
-						array_push($diva4,$div4->nodeValue);
-			}
-			foreach($divs5 as $div5) {
-
-						array_push($diva5,$div5->nodeValue);
-			}
-			foreach($divs6 as $div6) {
-
-						array_push($diva6,$div6->nodeValue);
-			}
-			foreach($divs7 as $div7) {
-
-						array_push($diva7,$div7->nodeValue);
-			}
-			foreach($divs8 as $div8) {
-
-						array_push($diva8,$div8->nodeValue);
-			}
-			foreach($divs9 as $div9) {
-
-						array_push($diva9,$div9->nodeValue);
-			}
-			foreach($divs10 as $div10) {
-
-						array_push($diva10,$div10->nodeValue);
-			}
-			foreach($divs11 as $div11) {
-
-						array_push($diva11,$div11->nodeValue);
-			}
-			foreach($divs12 as $div12) {
-
-						array_push($diva12,$div12->nodeValue);
-			}
-			foreach($divs13 as $div13) {
-
-						array_push($diva13,$div13->nodeValue);
-			}
-
-		//$count=3;
-
-		for ($i=0;$i<$count;$i++){
-		$alert.="\n\n";
-		$alert.= "Ente: ".$diva1[$i]."\n";
-		$alert.= "Proprietà: ".$diva[$i]."\n";
-		$alert.= "Descrizione: ".$diva2[$i]."\n";
-		if ($diva3[$i]!=NULL) $alert.= "\n".$diva3[$i];
-		if ($diva4[$i]!=NULL) $alert.= "\nApertura: ".$diva4[$i];
-		if ($diva5[$i]!=NULL)$alert.= "\nSitoweb: ".$diva5[$i];
-		if ($diva6[$i]!=NULL) $alert.= "\nEmail: ".$diva6[$i];
-		if ($diva7[$i]!=NULL)$alert.= "\nTelefono: ".$diva7[$i];
-		if ($diva11[$i]!=NULL)$alert.= "\nIndirizzo: ".$diva11[$i];
-		if ($diva13[$i]!=NULL)$alert.= "\nApertura: ".$diva13[$i];
-		if ($diva8[$i]!=NULL) $alert.= "\nChiusura settimanale: ".$diva8[$i];
-
-
-		if ($dival[$i]!=NULL) {
-
-			$longUrl = "http://www.beniculturali.it/mibac/opencms/MiBAC/sito-MiBAC/MenuPrincipale/LuoghiDellaCultura/Ricerca/index.html?action=show&idluogo=".$dival[$i];
-
-			$apiKey = API;
-
-			$postData = array('longUrl' => $longUrl, 'key' => $apiKey);
-			$jsonData = json_encode($postData);
-
-			$curlObj = curl_init();
-
-			curl_setopt($curlObj, CURLOPT_URL, 'https://www.googleapis.com/urlshortener/v1/url?key='.$apiKey);
-			curl_setopt($curlObj, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($curlObj, CURLOPT_SSL_VERIFYPEER, 0);
-			curl_setopt($curlObj, CURLOPT_HEADER, 0);
-			curl_setopt($curlObj, CURLOPT_HTTPHEADER, array('Content-type:application/json'));
-			curl_setopt($curlObj, CURLOPT_POST, 1);
-			curl_setopt($curlObj, CURLOPT_POSTFIELDS, $jsonData);
-
-			$response = curl_exec($curlObj);
-
-			// Change the response json string to object
-			$json = json_decode($response);
-
-			curl_close($curlObj);
-			$shortLink = get_object_vars($json);
-			$alert .="\nScheda completa: ".$shortLink['id'];
-		//	$alert .="Foto: ".$diva12[$i]."\n\n";
-	//		$content = array('chat_id' => $chat_id, 'text' => $diva12[$i]);
-	//		$telegram->sendMessage($content);
-		}
-		if ($diva12[$i]!=NULL) {
-
-			$longUrl = $diva12[$i];
-			$apiKey = API;
-
-			$postData = array('longUrl' => $longUrl, 'key' => $apiKey);
-			$jsonData = json_encode($postData);
-
-			$curlObj = curl_init();
-
-			curl_setopt($curlObj, CURLOPT_URL, 'https://www.googleapis.com/urlshortener/v1/url?key='.$apiKey);
-			curl_setopt($curlObj, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($curlObj, CURLOPT_SSL_VERIFYPEER, 0);
-			curl_setopt($curlObj, CURLOPT_HEADER, 0);
-			curl_setopt($curlObj, CURLOPT_HTTPHEADER, array('Content-type:application/json'));
-			curl_setopt($curlObj, CURLOPT_POST, 1);
-			curl_setopt($curlObj, CURLOPT_POSTFIELDS, $jsonData);
-
-			$response = curl_exec($curlObj);
-
-			// Change the response json string to object
-			$json = json_decode($response);
-
-			curl_close($curlObj);
-			$shortLink = get_object_vars($json);
-			$alert .="\nFoto/Video: ".$shortLink['id'];
-		}
-			$alert.="\n\n__________________";
-
-
-
-	}
-
-	//	echo $alert;
-
-		$chunks = str_split($alert, self::MAX_LENGTH);
+	$chunks = str_split($temp_c1, self::MAX_LENGTH);
 		foreach($chunks as $chunk) {
-//			$forcehide=$telegram->buildForceReply(true);
-				//chiedo cosa sta accadendo nel luogo
-	//		$content = array('chat_id' => $chat_id, 'text' => $chunk, 'reply_markup' =>$forcehide,'disable_web_page_preview'=>true);
-	$forcehide=$telegram->buildForceReply(true);
+//	$forcehide=$telegram->buildForceReply(true);
 		//chiedo cosa sta accadendo nel luogo
 	$content = array('chat_id' => $chat_id, 'text' => $chunk,'disable_web_page_preview'=>true);
 
@@ -313,274 +140,33 @@ function location_manager($telegram,$user_id,$chat_id,$location)
 			$lon=$location["longitude"];
 			$lat=$location["latitude"];
 			$response=$telegram->getData();
-				$reply="http://nominatim.openstreetmap.org/reverse?email=piersoft2@gmail.com&format=json&lat=".$lat."&lon=".$lon."&zoom=18&addressdetails=1";
-				$json_string = file_get_contents($reply);
-				$parsed_json = json_decode($json_string);
-				//var_dump($parsed_json);
-				$comune="";
-				$temp_c1 =$parsed_json->{'display_name'};
-
-				if ($parsed_json->{'address'}->{'town'}) {
-					$temp_c1 .="\nCittà: ".$parsed_json->{'address'}->{'town'};
-					$comune .=$parsed_json->{'address'}->{'town'};
-				}else 	$comune .=$parsed_json->{'address'}->{'city'};
-
-				if ($parsed_json->{'address'}->{'village'}) $comune .=$parsed_json->{'address'}->{'village'};
-				$location="Comune di: ".$comune." tramite le coordinate che hai inviato: ".$lat.",".$lon;
-				$content = array('chat_id' => $chat_id, 'text' => $location,'disable_web_page_preview'=>true);
-				$telegram->sendMessage($content);
-
-			  $alert="";
-				echo $comune;
-					$html = file_get_contents('http://dbunico20.beniculturali.it/DBUnicoManagerWeb/dbunicomanager/searchPlace?tipologiaLuogo=1&quantita=20&comune='.$comune);
-					//echo $html;
-					//$html = iconv('ASCII', 'UTF-8//IGNORE', $html);
-			//		$html=utf8_decode($html);
-		  	$html=str_replace("<![CDATA[","",$html);
-		  	$html=str_replace("]]>","",$html);
-  			$html=str_replace("</br>","",$html);
-				$html=str_replace("\n","",$html);
-				$html=str_replace("&nbsp;","",$html);
-				$html=str_replace(";"," ",$html);
-	 			$html=str_replace(","," ",$html);
-				if (strpos($html,'<mibac>') == false) {
-					$content = array('chat_id' => $chat_id, 'text' => "Non ci risultano Musei censiti Mibact in questo luogo",'disable_web_page_preview'=>true);
+			$location="Sto cercando i Campioni digitali censiti nei 20Km attorno a ".$lat.",".$lon;
+			$content = array('chat_id' => $chat_id, 'text' => $location,'disable_web_page_preview'=>true);
+			$telegram->sendMessage($content);
+			$url="http://www.digitalchampions.it/?geo_mashup_content=geo-query&near_lat=".$lat;
+				$url .="&near_lng=".$lon;
+				$url .="&radius_km=20";
+			$json_string = file_get_contents($url);
+			$parsed_json = json_decode($json_string);
+			$count=0;
+			$temp_c1="";
+			foreach($parsed_json->{'objects'} as $data=>$csv1){
+			   $count = $count+1;
+				}
+				if ($count==0) {
+					$content = array('chat_id' => $chat_id, 'text' => "Non ci risultano digitalchampions in questo luogo",'disable_web_page_preview'=>true);
 						$telegram->sendMessage($content);
 				}
-
-				$doc = new DOMDocument;
-				$doc->loadHTML($html);
-
-				$xpa    = new DOMXPath($doc);
-					//var_dump($doc);
-				$divsl   = $xpa->query('//codice[@sorgente="DBUnico 2.0"]');
-				$divs0   = $xpa->query('//mibac');
-				$divs   = $xpa->query('//mibac//luogodellacultura/proprieta');
-				$divs1   = $xpa->query('//mibac//luogodellacultura/denominazione/nomestandard');
-				$divs2   = $xpa->query('//mibac//luogodellacultura/descrizione/testostandard');
-				$divs3   = $xpa->query('//mibac//luogodellacultura/descrizione/traduzioni');
-				$divs4   = $xpa->query('//mibac//luogodellacultura/orario/testostandard');
-				$divs5   = $xpa->query('//info/sitoweb');
-				$divs6   = $xpa->query('//info/email');
-				$divs7   = $xpa->query('//info/telefono/testostandard');
-				$divs8   = $xpa->query('//chiusurasettimanale/testostandard');
-				$divs9   = $xpa->query('//latitudine');
-				$divs10   = $xpa->query('//longitudine');
-				$divs11   = $xpa->query('//indirizzo/via-piazza');
-				$divs12   = $xpa->query('//allegati/file/url');
-				$divs13   = $xpa->query('//info/orario/testostandard');
-				$dival=[];
-				$diva=[];
-				$diva1=[];
-				$diva2=[];
-				$diva3=[];
-				$diva4=[];
-				$diva5=[];
-				$diva6=[];
-				$diva7=[];
-				$diva8=[];
-				$diva9=[];
-				$diva10=[];
-				$diva11=[];
-				$diva12=[];
-					$diva13=[];
-				$count=0;
-				foreach($divs0 as $div0) {
-					$count++;
-				}
-				echo "Count: ".$count."\n";
-				foreach($divsl as $divl) {
-
-							array_push($dival,$divl->nodeValue);
-				}
-
-					foreach($divs as $div) {
-							array_push($diva,$div->nodeValue);
-
-					}
-
-					foreach($divs1 as $div1) {
-
-								array_push($diva1,$div1->nodeValue);
-					}
-
-					foreach($divs2 as $div2) {
-
-								array_push($diva2,$div2->nodeValue);
-					}
-					foreach($divs3 as $div3) {
-
-								array_push($diva3,$div3->nodeValue);
-					}
-					foreach($divs4 as $div4) {
-
-								array_push($diva4,$div4->nodeValue);
-					}
-					foreach($divs5 as $div5) {
-
-								array_push($diva5,$div5->nodeValue);
-					}
-					foreach($divs6 as $div6) {
-
-								array_push($diva6,$div6->nodeValue);
-					}
-					foreach($divs7 as $div7) {
-
-								array_push($diva7,$div7->nodeValue);
-					}
-					foreach($divs8 as $div8) {
-
-								array_push($diva8,$div8->nodeValue);
-					}
-					foreach($divs9 as $div9) {
-
-								array_push($diva9,$div9->nodeValue);
-					}
-					foreach($divs10 as $div10) {
-
-								array_push($diva10,$div10->nodeValue);
-					}
-					foreach($divs11 as $div11) {
-
-								array_push($diva11,$div11->nodeValue);
-					}
-					foreach($divs12 as $div12) {
-
-								array_push($diva12,$div12->nodeValue);
-					}
-					foreach($divs13 as $div13) {
-
-								array_push($diva13,$div13->nodeValue);
-					}
-
-			  //$count=3;
-
-				for ($i=0;$i<$count;$i++){
-				$alert.="\n\n";
-				$alert.= "Ente: ".$diva1[$i]."\n";
-				$alert.= "Proprietà: ".$diva[$i]."\n";
-				$alert.= "Descrizione: ".$diva2[$i]."\n";
-				if ($diva3[$i]!=NULL) $alert.= "\n".$diva3[$i];
-				if ($diva4[$i]!=NULL) $alert.= "\nApertura: ".$diva4[$i];
-				if ($diva5[$i]!=NULL)$alert.= "\nSitoweb: ".$diva5[$i];
-				if ($diva6[$i]!=NULL) $alert.= "\nEmail: ".$diva6[$i];
-				if ($diva7[$i]!=NULL)$alert.= "\nTelefono: ".$diva7[$i];
-				if ($diva11[$i]!=NULL)$alert.= "\nIndirizzo: ".$diva11[$i];
-				if ($diva13[$i]!=NULL)$alert.= "\nApertura: ".$diva13[$i];
-				if ($diva8[$i]!=NULL) $alert.= "\nChiusura settimanale: ".$diva8[$i];
-
-				if ($diva9[$i]!=NULL){
-					$theta = $lon-$diva10[$i];
-					$dist = sin(deg2rad($lat)) * sin(deg2rad($diva9[$i])) +  cos(deg2rad($lat)) * cos(deg2rad($diva9[$i])) * cos(deg2rad($theta));
-					$dist = acos($dist);
-					$dist = rad2deg($dist);
-					$miles = $dist * 60 * 1.1515 * 1.609344;
-					if ($miles >=1){
-						$alert .="\nDistanza: ".number_format($miles, 2, '.', '')." Km\n";
-					} else $alert .="\nDistanza: ".number_format(($miles*1000), 0, '.', '')." mt\n";
-
-
-				}
-
-/*
-				$longUrl = "http://www.openstreetmap.org/?mlat=".$diva9[$i]."&mlon=".$diva10[$i]."#map=19/".$diva9[$i]."/".$diva10[$i];
-
-				$apiKey = API;
-
-				$postData = array('longUrl' => $longUrl, 'key' => $apiKey);
-				$jsonData = json_encode($postData);
-
-				$curlObj = curl_init();
-
-				curl_setopt($curlObj, CURLOPT_URL, 'https://www.googleapis.com/urlshortener/v1/url?key='.$apiKey);
-				curl_setopt($curlObj, CURLOPT_RETURNTRANSFER, 1);
-				curl_setopt($curlObj, CURLOPT_SSL_VERIFYPEER, 0);
-				curl_setopt($curlObj, CURLOPT_HEADER, 0);
-				curl_setopt($curlObj, CURLOPT_HTTPHEADER, array('Content-type:application/json'));
-				curl_setopt($curlObj, CURLOPT_POST, 1);
-				curl_setopt($curlObj, CURLOPT_POSTFIELDS, $jsonData);
-
-				$response = curl_exec($curlObj);
-
-				// Change the response json string to object
-				$json = json_decode($response);
-
-				curl_close($curlObj);
-				$shortLink = get_object_vars($json);
-				$alert .="\nMappa: ".$shortLink['id'];
-				}
-*/
-			//	$alert .= "\n\n";
-				if ($dival[$i]!=NULL) {
-
-					$longUrl = "http://www.beniculturali.it/mibac/opencms/MiBAC/sito-MiBAC/MenuPrincipale/LuoghiDellaCultura/Ricerca/index.html?action=show&idluogo=".$dival[$i];
-
-					$apiKey = API;
-
-					$postData = array('longUrl' => $longUrl, 'key' => $apiKey);
-					$jsonData = json_encode($postData);
-
-					$curlObj = curl_init();
-
-					curl_setopt($curlObj, CURLOPT_URL, 'https://www.googleapis.com/urlshortener/v1/url?key='.$apiKey);
-					curl_setopt($curlObj, CURLOPT_RETURNTRANSFER, 1);
-					curl_setopt($curlObj, CURLOPT_SSL_VERIFYPEER, 0);
-					curl_setopt($curlObj, CURLOPT_HEADER, 0);
-					curl_setopt($curlObj, CURLOPT_HTTPHEADER, array('Content-type:application/json'));
-					curl_setopt($curlObj, CURLOPT_POST, 1);
-					curl_setopt($curlObj, CURLOPT_POSTFIELDS, $jsonData);
-
-					$response = curl_exec($curlObj);
-
-					// Change the response json string to object
-					$json = json_decode($response);
-
-					curl_close($curlObj);
-					$shortLink = get_object_vars($json);
-					$alert .="\nScheda completa: ".$shortLink['id'];
-				//	$alert .="Foto: ".$diva12[$i]."\n\n";
-			//		$content = array('chat_id' => $chat_id, 'text' => $diva12[$i]);
-			//		$telegram->sendMessage($content);
-				}
-				if ($diva12[$i]!=NULL) {
-
-					$longUrl = $diva12[$i];
-					$apiKey = API;
-
-					$postData = array('longUrl' => $longUrl, 'key' => $apiKey);
-					$jsonData = json_encode($postData);
-
-					$curlObj = curl_init();
-
-					curl_setopt($curlObj, CURLOPT_URL, 'https://www.googleapis.com/urlshortener/v1/url?key='.$apiKey);
-					curl_setopt($curlObj, CURLOPT_RETURNTRANSFER, 1);
-					curl_setopt($curlObj, CURLOPT_SSL_VERIFYPEER, 0);
-					curl_setopt($curlObj, CURLOPT_HEADER, 0);
-					curl_setopt($curlObj, CURLOPT_HTTPHEADER, array('Content-type:application/json'));
-					curl_setopt($curlObj, CURLOPT_POST, 1);
-					curl_setopt($curlObj, CURLOPT_POSTFIELDS, $jsonData);
-
-					$response = curl_exec($curlObj);
-
-					// Change the response json string to object
-					$json = json_decode($response);
-
-					curl_close($curlObj);
-					$shortLink = get_object_vars($json);
-					$alert .="\nFoto/Video: ".$shortLink['id'];
-				//	$alert .="Foto: ".$diva12[$i]."\n\n";
-			//		$content = array('chat_id' => $chat_id, 'text' => $diva12[$i]);
-			//		$telegram->sendMessage($content);
-				}
-					$alert.="\n\n__________________";
-
-
-
+				  for ($i=0;$i<$count;$i++){
+			$temp_c1 .= $parsed_json->{'objects'}[$i]->{'title'}."\nhttp://www.digitalchampions.it/?p=".$parsed_json->{'objects'}[$i]->{'object_id'};
+			$temp_c1 .="\n";
+			//var_dump($parsed_json);
 			}
+
 
 			//	echo $alert;
 
-				$chunks = str_split($alert, self::MAX_LENGTH);
+				$chunks = str_split($temp_c1, self::MAX_LENGTH);
 				foreach($chunks as $chunk) {
 		    $forcehide=$telegram->buildForceReply(true);
 		   	$content = array('chat_id' => $chat_id, 'text' => $chunk,'disable_web_page_preview'=>true);
