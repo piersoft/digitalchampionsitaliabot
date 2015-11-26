@@ -41,7 +41,7 @@ function start($telegram,$update)
 	$today = date("Y-m-d H:i:s");
 
 	if ($text == "/start") {
-		$reply = "Benvenuto. Per ricercare un Digital Champions italiano, clicca sulla graffetta (📎) e poi 'posizione' oppure digita il nome del Comune. Verrà interrogato il DataBase e verranno elencati fino a max 20 campioni digitali. In qualsiasi momento scrivendo /start ti ripeterò questo messaggio di benvenuto.\nQuesto bot, non ufficiale, è stato realizzato da @piersoft e il codice sorgente per libero riuso si trova su https://github.com/piersoft/digitalchampionsbot. La propria posizione viene ricercata grazie al geocoder di openStreetMap con Lic. odbl.";
+		$reply = "Benvenuto. Per ricercare un Digital Champions italiano, clicca sulla graffetta (📎) e poi 'posizione' oppure digita il nome del Comune. Verrà interrogato il DataBase e verranno elencati fino a max 20 campioni digitali. In qualsiasi momento scrivendo /start ti ripeterò questo messaggio di benvenuto.\nQuesto bot, non ufficiale, è stato realizzato da @piersoft e il codice sorgente per libero riuso si trova su https://github.com/piersoft/digitalchampionsitaliabot. La propria posizione viene ricercata grazie al geocoder di openStreetMap con Lic. odbl.";
 		$content = array('chat_id' => $chat_id, 'text' => $reply,'disable_web_page_preview'=>true);
 		$telegram->sendMessage($content);
 		$log=$today. ";new chat started;" .$chat_id. "\n";
